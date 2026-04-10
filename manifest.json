@@ -1,0 +1,12 @@
+{
+  "name": "Stiletto Compute",
+  "id": "stiletto-compute-plugin",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "Plugin needs to connect to AI generation API for image generation"
+  }
+}
