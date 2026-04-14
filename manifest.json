@@ -7,13 +7,14 @@
   "editorType": ["figma"],
   "networkAccess": {
     "allowedDomains": [
+      "https://stiletto-staging.k.avito.ru",
       "https://stiletto.avito.ru",
       "https://osiam.avito.ru",
       "https://osiam-test.avito.ru",
       "https://fal.run",
       "*.fal.ai"
     ],
-    "reasoning": "HTTPS requests to Stiletto backend for OAuth, jobs and uploads; Keycloak SSO endpoints; fal.ai for generation.",
+    "reasoning": "HTTPS requests to Stiletto staging/prod backend for OAuth and jobs; Keycloak SSO endpoints; fal.ai for generation.",
     "devAllowedDomains": [
       "*"
     ]
