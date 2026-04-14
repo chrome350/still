@@ -1,6 +1,7 @@
 figma.showUI(__html__, { width: 422, height: 680 });
 
 let placeholderNode = null;
+const AUTH_STORAGE_KEY = 'stiletto_auth_v1';
 
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'create-placeholder') {
@@ -62,6 +63,21 @@ figma.ui.onmessage = async (msg) => {
 
   if (msg.type === 'notify') {
     figma.notify(msg.message);
+  }
+
+  if (msg.type === 'auth:get') {
+    const auth = await figma.clientStorage.getAsync(AUTH_STORAGE_KEY);
+    figma.ui.postMessage({ type: 'auth:state', auth: auth || null });
+  }
+
+  if (msg.type === 'auth:save') {
+    await figma.clientStorage.setAsync(AUTH_STORAGE_KEY, msg.auth || null);
+    figma.ui.postMessage({ type: 'auth:saved' });
+  }
+
+  if (msg.type === 'auth:clear') {
+    await figma.clientStorage.deleteAsync(AUTH_STORAGE_KEY);
+    figma.ui.postMessage({ type: 'auth:cleared' });
   }
 
   if (msg.type === 'close') {

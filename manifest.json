@@ -6,7 +6,16 @@
   "ui": "ui.html",
   "editorType": ["figma"],
   "networkAccess": {
-    "allowedDomains": ["*"],
-    "reasoning": "Plugin needs to connect to AI generation API for image generation"
+    "allowedDomains": [
+      "https://stiletto.avito.ru",
+      "https://osiam.avito.ru",
+      "https://osiam-test.avito.ru",
+      "https://fal.run",
+      "*.fal.ai"
+    ],
+    "reasoning": "HTTPS requests to Stiletto backend for OAuth, jobs and uploads; Keycloak SSO endpoints; fal.ai for generation.",
+    "devAllowedDomains": [
+      "*"
+    ]
   }
 }
