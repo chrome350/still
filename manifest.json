@@ -1,6 +1,6 @@
 {
-  "name": "Stiletto Compute",
-  "id": "stiletto-compute-plugin",
+  "name": "Stiletto Compute SPA",
+  "id": "stiletto-compute-plugin-spa",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
@@ -12,7 +12,7 @@
       "https://osiam.avito.ru",
       "https://osiam-test.avito.ru",
       "https://fal.run",
-      "*.fal.ai"
+      "https://*.fal.ai"
     ],
     "reasoning": "HTTPS requests to Stiletto staging/prod backend for OAuth and jobs; Keycloak SSO endpoints; fal.ai for generation.",
     "devAllowedDomains": [
