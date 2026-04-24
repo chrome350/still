@@ -3,23 +3,6 @@ figma.showUI(__html__, { width: 422, height: 680 });
 let placeholderNode = null;
 const AUTH_STORAGE_KEY = 'stiletto_auth_v1';
 
-function dataUrlToBytes(dataUrl) {
-  const parts = String(dataUrl || '').split(',');
-  if (parts.length !== 2) throw new Error('Invalid data URL');
-  const meta = parts[0];
-  const b64 = parts[1];
-  const mimeMatch = meta.match(/^data:(.*);base64$/);
-  const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
-  const bytes = figma.base64Decode(b64);
-  return { bytes, mime };
-}
-
-function bytesToBase64(bytes) {
-  let s = '';
-  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-  return btoa(s);
-}
-
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'create-placeholder') {
     const w = msg.width || 512;
@@ -99,64 +82,5 @@ figma.ui.onmessage = async (msg) => {
 
   if (msg.type === 'close') {
     figma.closePlugin();
-  }
-
-  if (msg.type === 'api:request') {
-    const requestId = msg.requestId;
-    try {
-      const method = msg.method || 'GET';
-      const headers = msg.headers || {};
-      const init = { method, headers };
-
-      if (msg.bodyType === 'json') {
-        init.headers = Object.assign({}, headers, { 'Content-Type': 'application/json' });
-        init.body = JSON.stringify(msg.body || {});
-      }
-
-      if (msg.bodyType === 'multipart-image') {
-        const form = new FormData();
-        const parsed = dataUrlToBytes(msg.imageDataUrl);
-        const blob = new Blob([parsed.bytes], { type: parsed.mime });
-        const ext = parsed.mime.includes('jpeg') ? 'jpg' : 'png';
-        form.append('image', blob, msg.filename || `upload.${ext}`);
-        init.body = form;
-      }
-
-      const res = await fetch(msg.url, init);
-      const responseHeaders = {};
-      res.headers.forEach((value, key) => {
-        responseHeaders[key] = value;
-      });
-
-      let body = null;
-      if (msg.responseType === 'arraybuffer') {
-        const ab = await res.arrayBuffer();
-        body = bytesToBase64(new Uint8Array(ab));
-      } else {
-        const text = await res.text();
-        try {
-          body = JSON.parse(text);
-        } catch (parseError) {
-          body = text;
-        }
-      }
-
-      figma.ui.postMessage({
-        type: 'api:response',
-        requestId,
-        ok: res.ok,
-        status: res.status,
-        headers: responseHeaders,
-        body
-      });
-    } catch (e) {
-      figma.ui.postMessage({
-        type: 'api:response',
-        requestId,
-        ok: false,
-        status: 0,
-        error: e && e.message ? e.message : 'request failed'
-      });
-    }
   }
 };
