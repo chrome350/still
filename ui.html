@@ -1005,9 +1005,6 @@ let generatedImageBase64 = null;
 let appState = 'boot';
 let commandsConfig = [];
 let restoreJobsInProgress = false;
-let environmentReady = false;
-let _selectEnvPromise = null;
-let preferredEnv = 'staging';
 let apiRequestSeq = 0;
 const pendingApiRequests = new Map();
 
@@ -1016,6 +1013,9 @@ const pendingApiRequests = new Map();
 let authState = null;
 let isAuthInProgress = false;
 let lastAuthUrl = '';
+
+// Переключи на 'staging' для дебага на тестовом бэке.
+const STILETTO_ENV = 'prod';
 
 const ENVIRONMENTS = {
   prod: {
@@ -1031,37 +1031,7 @@ const ENVIRONMENTS = {
     clientId: 'stiletto'
   }
 };
-let ENV = { ...ENVIRONMENTS.prod };
-
-function selectEnvironment() {
-  if (environmentReady) return Promise.resolve();
-  if (_selectEnvPromise) return _selectEnvPromise;
-  _selectEnvPromise = (async () => {
-    const order = preferredEnv === 'staging' ? ['staging', 'prod'] : ['prod', 'staging'];
-    const errors = [];
-    for (const envName of order) {
-      const candidate = ENVIRONMENTS[envName];
-      try {
-        const res = await callMainApi({
-          url: `${candidate.baseUrl}/api/1/config`,
-          method: 'GET',
-          timeout: 8000
-        });
-        if (res.ok) {
-          ENV = { ...candidate };
-          preferredEnv = envName;
-          environmentReady = true;
-          return;
-        }
-        errors.push(`${envName}: HTTP ${res.status}`);
-      } catch (e) {
-        errors.push(`${envName}: ${e.message}`);
-      }
-    }
-    throw new Error(errors.join('; '));
-  })().finally(() => { _selectEnvPromise = null; });
-  return _selectEnvPromise;
-}
+const ENV = ENVIRONMENTS[STILETTO_ENV];
 
 function callMainApi({ url, method = 'GET', headers = {}, bodyType = null, body = null, imageDataUrl = null, filename = null, responseType = 'text', timeout = 45000 }) {
   const requestId = `api-${Date.now()}-${++apiRequestSeq}`;
@@ -1170,9 +1140,6 @@ async function pollForTokens(state, timeoutMs = 5 * 60 * 1000) {
 }
 
 async function authenticateViaSSO() {
-  if (!environmentReady) {
-    await selectEnvironment();
-  }
   if (isAuthInProgress) return;
   isAuthInProgress = true;
   try {
@@ -1277,9 +1244,6 @@ async function authedFetch(path, init = {}) {
 }
 
 async function fetchCommandsConfig() {
-  if (!environmentReady) {
-    await selectEnvironment();
-  }
   const res = await callMainApi({
     url: `${ENV.baseUrl}/api/1/config`,
     method: 'GET'
@@ -1474,9 +1438,6 @@ async function startAuthFlow() {
 
 requestAuthStateFromMain();
 setAppState('auth-required');
-selectEnvironment().catch((e) => {
-  parent.postMessage({ pluginMessage: { type: 'notify', message: `API недоступно: ${e.message}` } }, '*');
-});
 
 // === Screen navigation ===
 function showScreen(id) {
