@@ -1066,6 +1066,16 @@ function randomPkceVerifier() {
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 }
 
+// crypto.randomUUID тоже требует secure context, а iframe плагина в десктопе им не является.
+function uuidV4() {
+  const b = new Uint8Array(16);
+  crypto.getRandomValues(b);
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20,32)}`;
+}
+
 // crypto.subtle отсутствует в UI-iframe Figma-десктопа (не secure context),
 // поэтому считаем SHA-256 вручную.
 function sha256Bytes(bytes) {
@@ -1204,7 +1214,7 @@ async function authenticateViaSSO() {
     const popup = window.open('about:blank', '_blank', 'noopener,noreferrer,width=520,height=760');
     const codeVerifier = randomPkceVerifier();
     const codeChallenge = await toCodeChallenge(codeVerifier);
-    const state = crypto.randomUUID();
+    const state = uuidV4();
     const authUrl = buildKeycloakUrl(state, codeChallenge);
     lastAuthUrl = authUrl;
     const btnOpenAuth = document.getElementById('btn-open-auth');
