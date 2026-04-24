@@ -930,50 +930,9 @@ body {
 
 <!-- STYLE BACKDROP -->
 <div class="backdrop" id="style-backdrop" onclick="closePopups()"></div>
-<!-- STYLE POPUP (positioned from wrapper) -->
+<!-- STYLE POPUP (positioned from wrapper, items rendered from /api/1/config) -->
 <div class="popup-overlay popup-overlay-style" id="style-popup">
-  <div class="popup-styles">
-    <div class="popup-style-item selected" data-style="objects" onclick="selectStyle(this)">
-      <div class="popup-style-thumb"><img src="assets/embedded-11.png" alt="Объекты"></div>
-      <div class="popup-style-text">
-        <span class="popup-style-title">Объекты</span>
-        <span class="popup-style-sub">Базовая графика Авито</span>
-      </div>
-      <div class="popup-style-check">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.55006 15.15L18.0251 6.675C18.2251 6.475 18.4584 6.375 18.7251 6.375C18.9917 6.375 19.2251 6.475 19.4251 6.675C19.6251 6.875 19.7251 7.11267 19.7251 7.388C19.7251 7.66333 19.6251 7.90067 19.4251 8.1L10.2501 17.3C10.0501 17.5 9.81673 17.6 9.55006 17.6C9.28339 17.6 9.05006 17.5 8.85006 17.3L4.55006 13C4.35006 12.8 4.25406 12.5627 4.26206 12.288C4.27006 12.0133 4.37439 11.7757 4.57506 11.575C4.77572 11.3743 5.01339 11.2743 5.28806 11.275C5.56272 11.2757 5.80006 11.3757 6.00006 11.575L9.55006 15.15Z" fill="#E3E3E3"/></svg>
-      </div>
-    </div>
-    <div class="popup-style-item" data-style="characters" onclick="selectStyle(this)">
-      <div class="popup-style-thumb"><img src="assets/embedded-12.png" alt="Персонажи"></div>
-      <div class="popup-style-text">
-        <span class="popup-style-title">Персонажи</span>
-        <span class="popup-style-sub">Люди, кот</span>
-      </div>
-      <div class="popup-style-check">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.55006 15.15L18.0251 6.675C18.2251 6.475 18.4584 6.375 18.7251 6.375C18.9917 6.375 19.2251 6.475 19.4251 6.675C19.6251 6.875 19.7251 7.11267 19.7251 7.388C19.7251 7.66333 19.6251 7.90067 19.4251 8.1L10.2501 17.3C10.0501 17.5 9.81673 17.6 9.55006 17.6C9.28339 17.6 9.05006 17.5 8.85006 17.3L4.55006 13C4.35006 12.8 4.25406 12.5627 4.26206 12.288C4.27006 12.0133 4.37439 11.7757 4.57506 11.575C4.77572 11.3743 5.01339 11.2743 5.28806 11.275C5.56272 11.2757 5.80006 11.3757 6.00006 11.575L9.55006 15.15Z" fill="#E3E3E3"/></svg>
-      </div>
-    </div>
-    <div class="popup-style-item" data-style="animals" onclick="selectStyle(this)">
-      <div class="popup-style-thumb"><img src="assets/embedded-13.png" alt="Животные"></div>
-      <div class="popup-style-text">
-        <span class="popup-style-title">Животные</span>
-        <span class="popup-style-sub">Милые животные</span>
-      </div>
-      <div class="popup-style-check">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.55006 15.15L18.0251 6.675C18.2251 6.475 18.4584 6.375 18.7251 6.375C18.9917 6.375 19.2251 6.475 19.4251 6.675C19.6251 6.875 19.7251 7.11267 19.7251 7.388C19.7251 7.66333 19.6251 7.90067 19.4251 8.1L10.2501 17.3C10.0501 17.5 9.81673 17.6 9.55006 17.6C9.28339 17.6 9.05006 17.5 8.85006 17.3L4.55006 13C4.35006 12.8 4.25406 12.5627 4.26206 12.288C4.27006 12.0133 4.37439 11.7757 4.57506 11.575C4.77572 11.3743 5.01339 11.2743 5.28806 11.275C5.56272 11.2757 5.80006 11.3757 6.00006 11.575L9.55006 15.15Z" fill="#E3E3E3"/></svg>
-      </div>
-    </div>
-    <div class="popup-style-item" data-style="chrome" onclick="selectStyle(this)">
-      <div class="popup-style-thumb"><img src="assets/embedded-14.png" alt="Хромированная ADT"></div>
-      <div class="popup-style-text">
-        <span class="popup-style-title">Хромированная (ADT)</span>
-        <span class="popup-style-sub">В стиле диздепа</span>
-      </div>
-      <div class="popup-style-check">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.55006 15.15L18.0251 6.675C18.2251 6.475 18.4584 6.375 18.7251 6.375C18.9917 6.375 19.2251 6.475 19.4251 6.675C19.6251 6.875 19.7251 7.11267 19.7251 7.388C19.7251 7.66333 19.6251 7.90067 19.4251 8.1L10.2501 17.3C10.0501 17.5 9.81673 17.6 9.55006 17.6C9.28339 17.6 9.05006 17.5 8.85006 17.3L4.55006 13C4.35006 12.8 4.25406 12.5627 4.26206 12.288C4.27006 12.0133 4.37439 11.7757 4.57506 11.575C4.77572 11.3743 5.01339 11.2743 5.28806 11.275C5.56272 11.2757 5.80006 11.3757 6.00006 11.575L9.55006 15.15Z" fill="#E3E3E3"/></svg>
-      </div>
-    </div>
-  </div>
+  <div class="popup-styles"></div>
 </div>
 
 <!-- REF POPUP -->
@@ -1277,25 +1236,57 @@ async function authedFetch(path, init = {}) {
   return response;
 }
 
+// Backend /api/1/config возвращает только {command, hint, type, workflow}.
+// Лейблы/тамбы не приходят, поэтому держим презентацию рядом, а попап
+// рендерим как пересечение конфига и этой карты — бэк управляет тем,
+// какие стили доступны.
+const STYLE_PRESENTATION = {
+  objects:     { title: 'Объекты',             sub: 'Базовая графика Авито', thumb: 'assets/embedded-11.png' },
+  characters:  { title: 'Персонажи',           sub: 'Люди, кот',             thumb: 'assets/embedded-12.png' },
+  animals:     { title: 'Животные',            sub: 'Милые животные',        thumb: 'assets/embedded-13.png' },
+  adt:         { title: 'Хромированная (ADT)', sub: 'В стиле диздепа',       thumb: 'assets/embedded-14.png' }
+};
+
+const STYLE_CHECK_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.55006 15.15L18.0251 6.675C18.2251 6.475 18.4584 6.375 18.7251 6.375C18.9917 6.375 19.2251 6.475 19.4251 6.675C19.6251 6.875 19.7251 7.11267 19.7251 7.388C19.7251 7.66333 19.6251 7.90067 19.4251 8.1L10.2501 17.3C10.0501 17.5 9.81673 17.6 9.55006 17.6C9.28339 17.6 9.05006 17.5 8.85006 17.3L4.55006 13C4.35006 12.8 4.25406 12.5627 4.26206 12.288C4.27006 12.0133 4.37439 11.7757 4.57506 11.575C4.77572 11.3743 5.01339 11.2743 5.28806 11.275C5.56272 11.2757 5.80006 11.3757 6.00006 11.575L9.55006 15.15Z" fill="#E3E3E3"/></svg>';
+
 async function fetchCommandsConfig() {
   const res = await apiFetch(`${ENV.baseUrl}/api/1/config`);
   if (!res.ok) throw new Error(`config failed: ${res.status}`);
   const data = res.body;
   commandsConfig = Array.isArray(data) ? data : [];
+  renderStylePopup();
 }
 
-function getCommandForCurrentStyle() {
-  const styleFallback = {
-    objects: 'objects',
-    animals: 'animals',
-    characters: 'person',
-    chrome: 'adt'
-  };
-  const preferred = styleFallback[currentStyle] || 'objects';
-  if (commandsConfig.some((c) => c.command === preferred)) return preferred;
-  if (commandsConfig.some((c) => c.command === currentStyle)) return currentStyle;
-  const generateCmd = commandsConfig.find((c) => c.type === 'generate');
-  return generateCmd ? generateCmd.command : preferred;
+function renderStylePopup() {
+  const container = document.querySelector('#style-popup .popup-styles');
+  if (!container) return;
+  const items = commandsConfig
+    .filter((c) => c.type === 'generate' && STYLE_PRESENTATION[c.command])
+    .map((c) => ({ command: c.command, ...STYLE_PRESENTATION[c.command] }));
+
+  if (items.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  if (!items.some((it) => it.command === currentStyle)) {
+    currentStyle = items[0].command;
+  }
+
+  container.innerHTML = items.map((item) => `
+    <div class="popup-style-item${item.command === currentStyle ? ' selected' : ''}" data-style="${item.command}" onclick="selectStyle(this)">
+      <div class="popup-style-thumb"><img src="${item.thumb}" alt="${item.title}"></div>
+      <div class="popup-style-text">
+        <span class="popup-style-title">${item.title}</span>
+        <span class="popup-style-sub">${item.sub}</span>
+      </div>
+      <div class="popup-style-check">${STYLE_CHECK_SVG}</div>
+    </div>
+  `).join('');
+
+  const current = items.find((it) => it.command === currentStyle);
+  const label = document.getElementById('current-style-label');
+  if (label && current) label.textContent = current.title;
 }
 
 function dataUrlToBlob(dataUrl) {
@@ -1324,7 +1315,7 @@ async function uploadImageDataUrl(dataUrl, index) {
 }
 
 async function createJob(prompt) {
-  const command = getCommandForCurrentStyle();
+  const command = currentStyle;
   const res = await authedFetch('/api/1/jobs/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
