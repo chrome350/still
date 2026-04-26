@@ -1166,8 +1166,8 @@ const FAKE_GENERATION_IMAGES = {
 let currentStyle = 'objects';
 let isGenerating = false;
 let _generationAbort = null;
-let generatedImageBase64 = null;
-let generatedImageDataUri = null;
+let generatedImageBytes = null;   // Uint8Array последней сгенерированной картинки
+let generatedImageDataUri = null; // та же картинка в виде data:URL — нужна только для <img src> в UI
 let appState = 'boot';
 let commandsConfig = [];
 let restoreJobsInProgress = false;
@@ -1564,13 +1564,40 @@ async function pollJobUntilDone(jobId, abortCtrl = null, timeoutMs = 20 * 60 * 1
   throw new Error('job status timeout');
 }
 
-async function fetchImageAsBase64(url) {
-  const res = await fetch(url);
+// Качаем результат через наш authed-endpoint, а не из fal.media напрямую.
+// Бэкенд проксирует через TCP/HTTP-2, что обходит Chromium-овский QUIC-баг
+// (ERR_QUIC_PROTOCOL_ERROR), который ронял прямые fetch'и к v3b.fal.media.
+// authedFetch не подходит — он парсит body как text/JSON, а нам нужен raw
+// arrayBuffer. Поэтому повторяем здесь его логику auth + retry on 401.
+async function fetchImageBytes(path) {
+  if (!hasAuth()) throw new Error('not authorized');
+  await ensureFreshToken();
+  const url = `${ENV.baseUrl}${path}`;
+  const doFetch = () => fetch(url, {
+    cache: 'no-store',
+    headers: { Authorization: `Bearer ${authState.idToken}` },
+  });
+  let res = await doFetch();
+  if (res.status === 401) {
+    await refreshAuthTokens();
+    res = await doFetch();
+  }
   if (!res.ok) throw new Error(`image fetch failed: ${res.status}`);
-  const buf = new Uint8Array(await res.arrayBuffer());
+  const ab = await res.arrayBuffer();
+  return new Uint8Array(ab);
+}
+
+// bytesToDataUrl нужна только для thumbnail в editImage(): чтобы поместить
+// сгенерированную картинку в input-images вместе с пользовательскими refs,
+// которые там лежат как data:-URL. Для основного потока (postMessage в main
+// thread) хватает Uint8Array — никаких base64 не нужно.
+function bytesToDataUrl(bytes, mimeType) {
   let binary = '';
-  for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
-  return btoa(binary);
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return `data:${mimeType || 'image/png'};base64,${btoa(binary)}`;
 }
 
 async function restorePendingJobsIfAny() {
@@ -1589,11 +1616,12 @@ async function restorePendingJobsIfAny() {
     updateSendButton();
     const done = await pollJobUntilDone(first.jobId);
     if (done.imageUrls && done.imageUrls.length > 0) {
-      generatedImageBase64 = await fetchImageAsBase64(done.imageUrls[0]);
+      generatedImageBytes = await fetchImageBytes(done.imageUrls[0]);
+      generatedImageDataUri = bytesToDataUrl(generatedImageBytes, 'image/png');
       parent.postMessage({
         pluginMessage: {
           type: 'insert-image',
-          data: generatedImageBase64,
+          bytes: generatedImageBytes,
           width: 512,
           height: 512,
           name: 'Stiletto — restored'
@@ -1855,15 +1883,15 @@ async function startGeneration() {
     if (!firstImage) {
       throw new Error('job done but no imageUrls');
     }
-    generatedImageBase64 = await fetchImageAsBase64(firstImage);
-    generatedImageDataUri = 'data:image/png;base64,' + generatedImageBase64;
+    generatedImageBytes = await fetchImageBytes(firstImage);
+    generatedImageDataUri = bytesToDataUrl(generatedImageBytes, 'image/png');
     _generationAbort = null;
     isGenerating = false;
     updateSendButton();
     parent.postMessage({
       pluginMessage: {
         type: 'fill-placeholder',
-        data: generatedImageBase64,
+        bytes: generatedImageBytes,
         name: 'Stiletto — ' + currentStyle
       }
     }, '*');
@@ -1931,7 +1959,10 @@ async function startFakeGeneration() {
 
   const dataUri = FAKE_GENERATION_IMAGES[currentStyle] || FAKE_GENERATION_IMAGES.objects;
   const base64 = dataUri.split(',', 2)[1];
-  generatedImageBase64 = base64;
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  generatedImageBytes = bytes;
   generatedImageDataUri = dataUri;
 
   // показываем картинку прямо в плашке загрузки
@@ -1942,7 +1973,7 @@ async function startFakeGeneration() {
   parent.postMessage({
     pluginMessage: {
       type: 'fill-placeholder',
-      data: base64,
+      bytes: bytes,
       name: 'Stiletto — ' + currentStyle + ' (DEV)'
     }
   }, '*');
@@ -1984,8 +2015,12 @@ function resetToStart() {
 }
 
 function editImage() {
-  if (generatedImageBase64) {
-    addImageThumb('data:image/png;base64,' + generatedImageBase64);
+  if (generatedImageBytes) {
+    // addImageThumb рендерит <img src="...">, который потом startGeneration
+    // читает как dataURL для uploadImageDataUrl. Поэтому конвертим байты в
+    // data URL — единственное место, где base64 ещё нужен (для совместимости
+    // с входным контейнером пользовательских refs).
+    addImageThumb(bytesToDataUrl(generatedImageBytes, 'image/png'));
   }
   document.getElementById('prompt-input').value = '';
   document.getElementById('prompt-input').focus();
@@ -2073,8 +2108,7 @@ showScreen = function(id) {
     if (ta) ta.placeholder = 'Что поправить?';
     // на done показываем ту же картинку, что и сгенерировалась
     const doneImg = document.getElementById('done-image');
-    const dataUri = generatedImageDataUri || (generatedImageBase64 ? 'data:image/png;base64,' + generatedImageBase64 : null);
-    if (doneImg && dataUri) doneImg.src = dataUri;
+    if (doneImg && generatedImageDataUri) doneImg.src = generatedImageDataUri;
   } else {
     const ta = document.getElementById('prompt-input');
     if (ta) ta.placeholder = 'Что нужно сделать…';
@@ -2099,11 +2133,11 @@ function handleNewImage() {
 }
 
 function insertToCanvas() {
-  if (generatedImageBase64) {
+  if (generatedImageBytes) {
     parent.postMessage({
       pluginMessage: {
         type: 'insert-image',
-        data: generatedImageBase64,
+        bytes: generatedImageBytes,
         width: 512,
         height: 512,
         name: 'Stiletto — ' + currentStyle

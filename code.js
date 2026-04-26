@@ -23,8 +23,7 @@ figma.ui.onmessage = async (msg) => {
   }
 
   if (msg.type === 'fill-placeholder') {
-    const imageBytes = figma.base64Decode(msg.data);
-    const image = figma.createImage(imageBytes);
+    const image = figma.createImage(msg.bytes);
     if (placeholderNode) {
       placeholderNode.cornerRadius = 0;
       placeholderNode.fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
@@ -44,8 +43,7 @@ figma.ui.onmessage = async (msg) => {
   }
 
   if (msg.type === 'insert-image') {
-    const imageBytes = figma.base64Decode(msg.data);
-    const image = figma.createImage(imageBytes);
+    const image = figma.createImage(msg.bytes);
     const node = figma.createRectangle();
     const w = msg.width || 512;
     const h = msg.height || 512;
