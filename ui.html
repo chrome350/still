@@ -608,6 +608,21 @@ body {
   justify-content: center;
   background: rgba(0,0,0,0.32);
   border-radius: 1000px;
+  overflow: hidden;
+}
+.glass-btn-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255,255,255,0.01);
+  pointer-events: none;
+  z-index: 1;
+  will-change: backdrop-filter;
+}
+.glass-btn > svg,
+.glass-btn > span {
+  position: relative;
+  z-index: 2;
 }
 .glass-btn:hover {
   background: #3a3939;
@@ -650,24 +665,37 @@ body {
   padding: 0;
   width: 36px;
   height: 36px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 50%;
   box-sizing: border-box;
-  background-image:
-    linear-gradient(180deg, #C0C0C0 0%, #808281 100%),
-    linear-gradient(135deg, #FFFFFF 0%, #C7C8CC 38%, #5F6166 100%);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+  background: transparent;
   overflow: hidden;
 }
 .btn-send:hover {
-  border-color: transparent;
-  background-image:
-    linear-gradient(180deg, #D0D0D0 0%, #8B8D8C 100%),
-    linear-gradient(135deg, #FFFFFF 0%, #D6D7DB 38%, #6B6D72 100%);
+  background: transparent;
+}
+.btn-send::before,
+.btn-send::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.btn-send::before {
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='36' height='36' viewBox='0 0 36 36' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='18' cy='18' r='17.5' fill='url(%23paint0_linear_519_2663)' stroke='url(%23paint1_linear_519_2663)'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_519_2663' x1='18' y1='0' x2='18' y2='36' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23C0C0C0'/%3E%3Cstop offset='1' stop-color='%23808281'/%3E%3C/linearGradient%3E%3ClinearGradient id='paint1_linear_519_2663' x1='18' y1='0' x2='18' y2='36' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='white'/%3E%3Cstop offset='0.5' stop-color='%23505050'/%3E%3Cstop offset='1' stop-color='white'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E");
+}
+.btn-send::after {
+  z-index: 2;
+  background-image: url("data:image/svg+xml,%3Csvg width='36' height='36' viewBox='0 0 36 36' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='18' cy='18' r='17.5' stroke='black'/%3E%3Ccircle cx='18' cy='18' r='17.5' stroke='url(%23paint0_linear_519_2666)'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_519_2666' x1='18' y1='0' x2='18' y2='36' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23656565'/%3E%3Cstop offset='1' stop-color='%23B1B1B1'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E");
 }
 .btn-send-content {
   position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -675,7 +703,7 @@ body {
   height: 100%;
   border-radius: 50%;
 }
-.btn-send svg {
+.btn-send-content svg {
   position: static;
   width: 20px;
   height: 20px;
@@ -860,35 +888,31 @@ body {
 }
 
 /* Backdrop */
-@keyframes backdrop-slide-in {
-  0% {
-    clip-path: polygon(0 100%, 0 100%, 0 100%);
-    opacity: 0;
-  }
-  100% {
-    clip-path: polygon(0 100%, 0 0, 100% 0, 100% 100%);
-    opacity: 1;
-  }
-}
 .backdrop {
-  display: none;
   position: fixed;
   inset: 0;
   z-index: 99;
   overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.34s;
 }
 .backdrop::before {
   content: '';
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.24);
-  clip-path: polygon(0 100%, 0 100%, 0 100%);
 }
 .backdrop.active {
-  display: block;
-}
-.backdrop.active::before {
-  animation: backdrop-slide-in 0.22s ease-out forwards;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
 }
 
 /* Wave keyframe */
@@ -1056,6 +1080,7 @@ body {
     <div class="input-actions">
       <div class="input-left">
         <button class="glass-btn btn-ref" onclick="toggleRefPopup()" title="Референс">
+          <div class="glass-btn-inner" id="glassRef"></div>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M7.49986 8.74998C8.19022 8.74998 8.74986 8.19034 8.74986 7.49998C8.74986 6.80962 8.19022 6.24998 7.49986 6.24998C6.8095 6.24998 6.24986 6.80962 6.24986 7.49998C6.24986 8.19034 6.8095 8.74998 7.49986 8.74998Z" fill="white"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M7.88454 2.5H12.1152C12.9048 2.49999 13.5429 2.49999 14.0599 2.54223C14.5927 2.58575 15.0625 2.67784 15.4978 2.89964C16.1878 3.25118 16.7487 3.81211 17.1002 4.50204C17.322 4.93734 17.4141 5.40719 17.4577 5.93993C17.4999 6.45695 17.4999 7.09508 17.4999 7.88466V12.1153C17.4999 12.9049 17.4999 13.5431 17.4577 14.0601C17.4141 14.5928 17.322 15.0627 17.1002 15.498C16.7487 16.1879 16.1878 16.7488 15.4978 17.1004C15.0625 17.3222 14.5927 17.4142 14.0599 17.4578C13.5429 17.5 12.9048 17.5 12.1152 17.5H7.88453C7.09495 17.5 6.45683 17.5 5.93981 17.4578C5.40707 17.4142 4.93722 17.3222 4.50191 17.1004C3.81199 16.7488 3.25106 16.1879 2.89952 15.498C2.67772 15.0627 2.58563 14.5928 2.54211 14.0601C2.49986 13.5431 2.49987 12.9049 2.49988 12.1153V7.88466C2.49987 7.09508 2.49986 6.45695 2.54211 5.93993C2.58563 5.40719 2.67772 4.93734 2.89952 4.50204C3.25106 3.81211 3.81199 3.25118 4.50191 2.89964C4.93722 2.67784 5.40707 2.58575 5.93981 2.54223C6.45683 2.49999 7.09496 2.49999 7.88454 2.5ZM6.06196 4.03725C5.62198 4.07319 5.3715 4.14005 5.1829 4.23615C4.77521 4.44388 4.44376 4.77534 4.23603 5.18302C4.13993 5.37162 4.07307 5.6221 4.03712 6.06208C4.00046 6.51081 3.99988 7.08755 3.99988 7.91666V12.0833C3.99988 12.9125 4.00046 13.4892 4.03712 13.9379C4.04009 13.9742 4.04327 14.0092 4.04665 14.043L6.4574 11.6323C6.60778 11.4819 6.75086 11.3388 6.88126 11.2281C7.02341 11.1074 7.19927 10.9817 7.42681 10.9081C7.74573 10.8049 8.08919 10.8056 8.40771 10.91C8.63496 10.9845 8.81032 11.1109 8.95201 11.2321C9.08198 11.3433 9.22449 11.4869 9.37428 11.6379L10.002 12.2706L12.3025 9.9701C12.4524 9.82023 12.595 9.6776 12.725 9.56724C12.8667 9.44689 13.042 9.32154 13.2688 9.24785C13.5868 9.14452 13.9294 9.14452 14.2474 9.24785C14.4742 9.32154 14.6495 9.44689 14.7912 9.56724C14.9212 9.6776 15.0639 9.82024 15.2137 9.97012L15.9999 10.7563V7.91667C15.9999 7.08755 15.9993 6.51082 15.9626 6.06208C15.9267 5.6221 15.8598 5.37162 15.7637 5.18302C15.556 4.77534 15.2245 4.44388 14.8169 4.23615C14.6283 4.14005 14.3778 4.07319 13.9378 4.03725C13.4891 4.00058 12.9123 4 12.0832 4H7.91654C7.08743 4 6.51069 4.00058 6.06196 4.03725ZM5.1829 15.7638C5.02397 15.6829 4.87662 15.5831 4.74368 15.4673L7.50047 12.7105C7.67483 12.5362 7.77406 12.4378 7.85188 12.3717C7.87646 12.3509 7.89282 12.3386 7.90221 12.3321C7.91035 12.3309 7.91863 12.3309 7.92677 12.3321C7.93613 12.3387 7.95245 12.351 7.97695 12.372C8.05451 12.4383 8.15335 12.5371 8.32703 12.7121L9.46757 13.8616C9.60803 14.0031 9.79908 14.0829 9.9985 14.0833C10.1979 14.0837 10.3893 14.0047 10.5303 13.8636L13.3456 11.0483C13.5194 10.8746 13.6182 10.7765 13.6957 10.7107C13.7202 10.69 13.7365 10.6778 13.7458 10.6713C13.754 10.67 13.7622 10.67 13.7704 10.6713C13.7797 10.6778 13.796 10.69 13.8205 10.7107C13.898 10.7765 13.9968 10.8746 14.1706 11.0483L15.9981 12.8758C15.9949 13.3054 15.9863 13.6483 15.9626 13.9379C15.9267 14.3779 15.8598 14.6284 15.7637 14.817C15.556 15.2247 15.2245 15.5561 14.8169 15.7638C14.6283 15.8599 14.3778 15.9268 13.9378 15.9628C13.4891 15.9994 12.9123 16 12.0832 16H7.91654C7.08742 16 6.51069 15.9994 6.06196 15.9628C5.62198 15.9268 5.3715 15.8599 5.1829 15.7638Z" fill="white"/>
@@ -1063,6 +1088,7 @@ body {
         </button>
         <div class="style-dropdown-wrapper">
           <button class="glass-btn style-dropdown" onclick="toggleStylePopup()">
+            <div class="glass-btn-inner" id="glassStyle"></div>
             <span id="current-style-label">Объекты</span>
             <svg width="8" height="16" viewBox="0 0 8 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.99996 9.97971L1.38407 7.7998L0.615845 8.72167L3.99996 11.5418L7.38407 8.72167L6.61584 7.7998L3.99996 9.97971Z" fill="white"/></svg>
           </button>
@@ -1070,6 +1096,7 @@ body {
       </div>
     </div>
   <button class="glass-btn btn-ref btn-send" id="btn-send" onclick="handleSend()" title="Отправить">
+      <div class="glass-btn-inner" id="glassSend"></div>
       <span class="btn-send-content">
         <svg class="send-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M10 3.125C10.2072 3.125 10.4059 3.20731 10.5524 3.35382L15.5524 8.35382C15.8574 8.65892 15.8574 9.15358 15.5524 9.45868C15.2473 9.76378 14.7526 9.76378 14.4475 9.45868L10.7812 5.79235V16.25C10.7812 16.6815 10.4315 17.0312 10 17.0312C9.56854 17.0312 9.21875 16.6815 9.21875 16.25V5.79235L5.55243 9.45868C5.24733 9.76378 4.75267 9.76378 4.44757 9.45868C4.14246 9.15358 4.14246 8.65892 4.44757 8.35382L9.44757 3.35382C9.59408 3.20731 9.7928 3.125 10 3.125Z" fill="white"/>
@@ -1148,7 +1175,7 @@ body {
   </div>
 </div>
 
-<input type="file" id="ref-file" accept="image/*" style="display:none">
+<input type="file" id="ref-file" accept="image/*" multiple style="display:none">
 
 <script>
 // === DEV / Test mode ===
@@ -1166,6 +1193,8 @@ const FAKE_GENERATION_IMAGES = {
 let currentStyle = 'objects';
 let isGenerating = false;
 let _generationAbort = null;
+let activeJobId = null;
+const cancellingJobIds = new Set();
 let generatedImageBytes = null;   // Uint8Array последней сгенерированной картинки
 let generatedImageDataUri = null; // та же картинка в виде data:URL — нужна только для <img src> в UI
 let appState = 'boot';
@@ -1493,7 +1522,10 @@ function renderStylePopup() {
 
   const current = items.find((it) => it.command === currentStyle);
   const label = document.getElementById('current-style-label');
-  if (label && current) label.textContent = current.title;
+  if (label && current) {
+    label.textContent = current.title;
+    requestAnimationFrame(updateStyleGlassFilter);
+  }
 }
 
 function dataUrlToBlob(dataUrl) {
@@ -1550,6 +1582,32 @@ async function createEditJob(prompt, imageIds) {
   return payload.jobId;
 }
 
+async function cancelJobs(jobId) {
+  if (!jobId || DEV_MODE) return { cancelledCount: 0 };
+  const res = await authedFetch('/api/1/jobs/cancel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jobId })
+  });
+  if (res.status === 404) return { cancelledCount: 0 };
+  if (res.status === 429) {
+    parent.postMessage({ pluginMessage: { type: 'notify', message: 'Слишком много запросов, попробуйте через минуту' } }, '*');
+    return { cancelledCount: 0 };
+  }
+  if (!res.ok) throw new Error(`jobs/cancel failed: ${res.status}`);
+  return res.body || { cancelledCount: 0 };
+}
+
+function cancelActiveJob(jobId) {
+  if (!jobId || cancellingJobIds.has(jobId)) return;
+  cancellingJobIds.add(jobId);
+  cancelJobs(jobId).catch((err) => {
+    console.warn('Failed to cancel job', err);
+  }).finally(() => {
+    cancellingJobIds.delete(jobId);
+  });
+}
+
 async function pollJobUntilDone(jobId, abortCtrl = null, timeoutMs = 20 * 60 * 1000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -1559,6 +1617,7 @@ async function pollJobUntilDone(jobId, abortCtrl = null, timeoutMs = 20 * 60 * 1
     const status = res.body;
     if (status.status === 'done') return status;
     if (status.status === 'failed') throw new Error(status.error || 'job failed');
+    if (status.status === 'cancelled') throw new Error('cancelled');
     await new Promise((r) => setTimeout(r, 5000));
   }
   throw new Error('job status timeout');
@@ -1603,6 +1662,8 @@ function bytesToDataUrl(bytes, mimeType) {
 async function restorePendingJobsIfAny() {
   if (restoreJobsInProgress || !hasAuth()) return;
   restoreJobsInProgress = true;
+  let restoreAbortCtrl = null;
+  let restoreJobId = null;
   try {
     const res = await authedFetch('/api/1/jobs');
     if (!res.ok) return;
@@ -1612,11 +1673,17 @@ async function restorePendingJobsIfAny() {
     if (!first || !first.jobId) return;
     parent.postMessage({ pluginMessage: { type: 'notify', message: 'Восстанавливаем незавершённую генерацию…' } }, '*');
     isGenerating = true;
+    _generationAbort = { aborted: false };
+    restoreAbortCtrl = _generationAbort;
+    restoreJobId = first.jobId;
+    activeJobId = restoreJobId;
     setAppState('loading');
     updateSendButton();
-    const done = await pollJobUntilDone(first.jobId);
+    const done = await pollJobUntilDone(restoreJobId, restoreAbortCtrl);
+    if (_generationAbort !== restoreAbortCtrl && _generationAbort !== null) return;
     if (done.imageUrls && done.imageUrls.length > 0) {
       generatedImageBytes = await fetchImageBytes(done.imageUrls[0]);
+      if (restoreAbortCtrl.aborted) throw new Error('cancelled');
       generatedImageDataUri = bytesToDataUrl(generatedImageBytes, 'image/png');
       parent.postMessage({
         pluginMessage: {
@@ -1627,15 +1694,22 @@ async function restorePendingJobsIfAny() {
           name: 'Stiletto — restored'
         }
       }, '*');
+      if (_generationAbort === restoreAbortCtrl) _generationAbort = null;
+      if (activeJobId === restoreJobId) activeJobId = null;
       isGenerating = false;
       updateSendButton();
       setAppState('done');
     }
   } catch (e) {
+    if (_generationAbort !== restoreAbortCtrl && _generationAbort !== null) return;
+    if (_generationAbort === restoreAbortCtrl) _generationAbort = null;
+    activeJobId = null;
     isGenerating = false;
     updateSendButton();
     setAppState('start');
   } finally {
+    if (_generationAbort === restoreAbortCtrl) _generationAbort = null;
+    if (activeJobId === restoreJobId) activeJobId = null;
     restoreJobsInProgress = false;
   }
 }
@@ -1733,6 +1807,7 @@ function selectStyle(el) {
   currentStyle = el.dataset.style;
   document.getElementById('current-style-label').textContent = el.querySelector('.popup-style-title').textContent;
   closePopups();
+  requestAnimationFrame(updateStyleGlassFilter);
 }
 
 // === Ref popup ===
@@ -1751,33 +1826,56 @@ function selectRef(type) {
   }
 }
 
-document.getElementById('ref-file').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file) {
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      addImageThumb(ev.target.result);
-    };
+    reader.onload = (ev) => resolve(ev.target.result);
+    reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
+  });
+}
+
+async function addImageFiles(files) {
+  const imageFiles = Array.from(files || []).filter((file) => file.type.startsWith('image/'));
+  if (imageFiles.length === 0) return;
+
+  const container = document.getElementById('input-images');
+  const availableSlots = Math.max(0, 3 - container.children.length);
+  if (availableSlots === 0) {
+    parent.postMessage({ pluginMessage: { type: 'notify', message: 'Максимум 3 изображения' } }, '*');
+    return;
   }
+
+  if (imageFiles.length > availableSlots) {
+    parent.postMessage({ pluginMessage: { type: 'notify', message: 'Можно добавить максимум 3 изображения' } }, '*');
+  }
+
+  const filesToAdd = imageFiles.slice(0, availableSlots);
+  for (const file of filesToAdd) {
+    try {
+      addImageThumb(await readImageFile(file));
+    } catch (err) {
+      parent.postMessage({ pluginMessage: { type: 'notify', message: 'Не удалось прочитать изображение' } }, '*');
+    }
+  }
+}
+
+document.getElementById('ref-file').addEventListener('change', async (e) => {
+  await addImageFiles(e.target.files);
+  e.target.value = '';
 });
 
 // Вставка изображений через Cmd+V / Ctrl+V
 document.addEventListener('paste', (e) => {
   const items = e.clipboardData && e.clipboardData.items;
   if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      e.preventDefault();
-      const file = item.getAsFile();
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        addImageThumb(ev.target.result);
-      };
-      reader.readAsDataURL(file);
-      break;
-    }
-  }
+  const files = Array.from(items)
+    .filter((item) => item.type.startsWith('image/'))
+    .map((item) => item.getAsFile())
+    .filter(Boolean);
+  if (files.length === 0) return;
+  e.preventDefault();
+  addImageFiles(files);
 });
 
 function addImageThumb(src) {
@@ -1846,6 +1944,7 @@ async function startGeneration() {
 
   isGenerating = true;
   _generationAbort = { aborted: false };
+  activeJobId = null;
   const abortCtrl = _generationAbort;
   resetLoadingPreview();
   setAppState('loading');
@@ -1877,6 +1976,15 @@ async function startGeneration() {
     } else {
       jobId = await createJob(prompt);
     }
+    if (_generationAbort !== abortCtrl && _generationAbort !== null) {
+      cancelActiveJob(jobId);
+      return;
+    }
+    activeJobId = jobId;
+    if (abortCtrl.aborted) {
+      cancelActiveJob(jobId);
+      throw new Error('cancelled');
+    }
 
     const done = await pollJobUntilDone(jobId, abortCtrl);
     const firstImage = done.imageUrls && done.imageUrls[0];
@@ -1884,8 +1992,10 @@ async function startGeneration() {
       throw new Error('job done but no imageUrls');
     }
     generatedImageBytes = await fetchImageBytes(firstImage);
+    if (abortCtrl.aborted) throw new Error('cancelled');
     generatedImageDataUri = bytesToDataUrl(generatedImageBytes, 'image/png');
-    _generationAbort = null;
+    if (_generationAbort === abortCtrl) _generationAbort = null;
+    if (activeJobId === jobId) activeJobId = null;
     isGenerating = false;
     updateSendButton();
     parent.postMessage({
@@ -1907,10 +2017,12 @@ async function startGeneration() {
     }
     setAppState('done');
   } catch (e) {
-    _generationAbort = null;
+    if (_generationAbort !== abortCtrl && _generationAbort !== null) return;
+    if (_generationAbort === abortCtrl) _generationAbort = null;
+    activeJobId = null;
     isGenerating = false;
     updateSendButton();
-    if (e.message === 'cancelled') return;
+    if (abortCtrl.aborted || e.message === 'cancelled') return;
     parent.postMessage({ pluginMessage: { type: 'remove-placeholder' } }, '*');
     parent.postMessage({ pluginMessage: { type: 'notify', message: e.message || 'Ошибка генерации' } }, '*');
     if (!hasAuth()) {
@@ -1989,6 +2101,8 @@ async function startFakeGeneration() {
 }
 
 function stopGeneration() {
+  const jobId = activeJobId;
+  activeJobId = null;
   if (_generationAbort) {
     _generationAbort.aborted = true;
     _generationAbort = null;
@@ -1997,6 +2111,7 @@ function stopGeneration() {
   updateSendButton();
   parent.postMessage({ pluginMessage: { type: 'remove-placeholder' } }, '*');
   setAppState('start');
+  cancelActiveJob(jobId);
 }
 
 
@@ -2174,6 +2289,329 @@ function handleLogout() {
 }
 
 // Wave animation replaced by Line.mp4 video
+
+// === Liquid Glass Buttons ===
+
+const SurfaceEquations = {
+  convex_circle:   (x) => Math.sqrt(1 - Math.pow(1 - x, 2)),
+  convex_squircle: (x) => Math.pow(1 - Math.pow(1 - x, 4), 1 / 4),
+  concave:         (x) => 1 - Math.sqrt(1 - Math.pow(x, 2)),
+  lip: (x) => {
+    const convex = Math.pow(1 - Math.pow(1 - Math.min(x * 2, 1), 4), 1 / 4);
+    const concave = 1 - Math.sqrt(1 - Math.pow(1 - x, 2)) + 0.1;
+    const smootherstep = 6 * Math.pow(x, 5) - 15 * Math.pow(x, 4) + 10 * Math.pow(x, 3);
+    return convex * (1 - smootherstep) + concave * smootherstep;
+  },
+};
+
+function calculateDisplacementMap1D(glassThickness, bezelWidth, surfaceFn, refractiveIndex, samples = 128) {
+  const eta = 1 / refractiveIndex;
+  function refract(normalX, normalY) {
+    const dot = normalY;
+    const k = 1 - eta * eta * (1 - dot * dot);
+    if (k < 0) return null;
+    const kSqrt = Math.sqrt(k);
+    return [-(eta * dot + kSqrt) * normalX, eta - (eta * dot + kSqrt) * normalY];
+  }
+  const result = [];
+  for (let i = 0; i < samples; i++) {
+    const x = i / samples;
+    const y = surfaceFn(x);
+    const dx = x < 1 ? 0.0001 : -0.0001;
+    const y2 = surfaceFn(Math.max(0, Math.min(1, x + dx)));
+    const derivative = (y2 - y) / dx;
+    const magnitude = Math.sqrt(derivative * derivative + 1);
+    const normal = [-derivative / magnitude, -1 / magnitude];
+    const refracted = refract(normal[0], normal[1]);
+    if (!refracted) {
+      result.push(0);
+    } else {
+      const remainingHeight = y * bezelWidth + glassThickness;
+      result.push(refracted[0] * (remainingHeight / refracted[1]));
+    }
+  }
+  return result;
+}
+
+function sampleDisplacementProfile(profile, ratio) {
+  if (profile.length === 0) return 0;
+  const x = Math.max(0, Math.min(1, ratio)) * (profile.length - 1);
+  const i = Math.floor(x);
+  const t = x - i;
+  const a = profile[i] || 0;
+  const b = profile[Math.min(i + 1, profile.length - 1)] || 0;
+  return a + (b - a) * t;
+}
+
+function calculateDisplacementMap2D(canvasW, canvasH, objW, objH, radius, bezelWidth, maxDisp, precomputed, edgeSoftness = 1) {
+  const imageData = new ImageData(canvasW, canvasH);
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    imageData.data[i] = 128; imageData.data[i+1] = 128;
+    imageData.data[i+2] = 0; imageData.data[i+3] = 255;
+  }
+  const r2 = radius * radius, r1sq = (radius + edgeSoftness) * (radius + edgeSoftness);
+  const rmbSq = Math.max(0, (radius - bezelWidth) * (radius - bezelWidth));
+  const wBetween = objW - radius * 2, hBetween = objH - radius * 2;
+  const oX = (canvasW - objW) / 2, oY = (canvasH - objH) / 2;
+  for (let y1 = 0; y1 < objH; y1++) {
+    for (let x1 = 0; x1 < objW; x1++) {
+      const idx = ((oY + y1) * canvasW + oX + x1) * 4;
+      const px = x1 + 0.5;
+      const py = y1 + 0.5;
+      const left = px < radius, right = px >= objW - radius;
+      const top  = py < radius, bottom = py >= objH - radius;
+      const x = left ? px - radius : right  ? px - radius - wBetween : 0;
+      const y = top  ? py - radius : bottom ? py - radius - hBetween : 0;
+      const d2 = x * x + y * y;
+      if (d2 <= r1sq && d2 >= rmbSq) {
+        const opacity = d2 < r2 ? 1 : 1 - (Math.sqrt(d2) - Math.sqrt(r2)) / (Math.sqrt(r1sq) - Math.sqrt(r2));
+        const dist = Math.sqrt(d2);
+        const cos = dist > 0 ? x / dist : 0, sin = dist > 0 ? y / dist : 0;
+        const bezelRatio = Math.max(0, Math.min(1, (radius - dist) / bezelWidth));
+        const distance = sampleDisplacementProfile(precomputed, bezelRatio);
+        const dX = maxDisp > 0 ? (-cos * distance) / maxDisp : 0;
+        const dY = maxDisp > 0 ? (-sin * distance) / maxDisp : 0;
+        imageData.data[idx]   = Math.max(0, Math.min(255, 128 + dX * 127 * opacity));
+        imageData.data[idx+1] = Math.max(0, Math.min(255, 128 + dY * 127 * opacity));
+        imageData.data[idx+2] = 0; imageData.data[idx+3] = 255;
+      }
+    }
+  }
+  return imageData;
+}
+
+function calculateSpecularHighlight(objW, objH, radius, bezelWidth, edgeSoftness = 1, specAngle = Math.PI / 3) {
+  const imageData = new ImageData(objW, objH);
+  const sv = [Math.cos(specAngle), Math.sin(specAngle)];
+  const thick = 1.5 * edgeSoftness;
+  const r2 = radius * radius, r1sq = (radius + edgeSoftness) * (radius + edgeSoftness);
+  const rmSq = Math.max(0, (radius - thick) * (radius - thick));
+  const wBetween = objW - radius * 2, hBetween = objH - radius * 2;
+  for (let y1 = 0; y1 < objH; y1++) {
+    for (let x1 = 0; x1 < objW; x1++) {
+      const idx = (y1 * objW + x1) * 4;
+      const px = x1 + 0.5;
+      const py = y1 + 0.5;
+      const left = px < radius, right = px >= objW - radius;
+      const top  = py < radius, bottom = py >= objH - radius;
+      const x = left ? px - radius : right  ? px - radius - wBetween : 0;
+      const y = top  ? py - radius : bottom ? py - radius - hBetween : 0;
+      const d2 = x * x + y * y;
+      if (d2 <= r1sq && d2 >= rmSq) {
+        const dist = Math.sqrt(d2);
+        const opacity = d2 < r2 ? 1 : 1 - (dist - Math.sqrt(r2)) / (Math.sqrt(r1sq) - Math.sqrt(r2));
+        const cos = dist > 0 ? x / dist : 0, sin = dist > 0 ? -y / dist : 0;
+        const dot = Math.abs(cos * sv[0] + sin * sv[1]);
+        const edgeRatio = Math.max(0, Math.min(1, (radius - dist) / thick));
+        const falloff = Math.sqrt(1 - (1 - edgeRatio) * (1 - edgeRatio));
+        const coeff = dot * falloff;
+        const color = Math.min(255, 255 * coeff);
+        const alpha = Math.min(255, color * coeff * opacity);
+        imageData.data[idx] = imageData.data[idx+1] = imageData.data[idx+2] = color;
+        imageData.data[idx+3] = alpha;
+      }
+    }
+  }
+  return imageData;
+}
+
+function imageDataToDataURL(imageData) {
+  const canvas = document.createElement('canvas');
+  canvas.width = imageData.width; canvas.height = imageData.height;
+  canvas.getContext('2d').putImageData(imageData, 0, 0);
+  return canvas.toDataURL();
+}
+
+function removeGlassFilter(filterId) {
+  document.querySelector(`[data-glass-filter="${filterId}"]`)?.remove();
+}
+
+function createGlassFilter(filterId, w, h, radius, cfg = {}) {
+  removeGlassFilter(filterId);
+
+  const bezelWidth      = cfg.bezelWidth      ?? 14;
+  const glassThick      = cfg.glassThickness  ?? 70;
+  const ior             = cfg.ior             ?? 1.45;
+  const specOpacity     = cfg.specularOpacity ?? 0.55;
+  const blur            = cfg.blur            ?? 0;
+  const refractionScale = cfg.refractionScale ?? 1;
+  const mapScale        = cfg.mapScale        ?? 3;
+  const specAngle       = cfg.specAngle       ?? Math.PI / 3;
+
+  const surfaceFn   = SurfaceEquations.convex_squircle;
+  const mapW        = Math.ceil(w * mapScale);
+  const mapH        = Math.ceil(h * mapScale);
+  const mapRadius   = radius * mapScale;
+  const mapBezel    = bezelWidth * mapScale;
+  const precomputed = calculateDisplacementMap1D(glassThick * mapScale, mapBezel, surfaceFn, ior, 256);
+  const maxDisp     = Math.max(...precomputed.map(Math.abs));
+  const cssMaxDisp  = maxDisp / mapScale;
+
+  const dispData = calculateDisplacementMap2D(mapW, mapH, mapW, mapH, mapRadius, mapBezel, maxDisp || 1, precomputed, mapScale);
+  const specData = calculateSpecularHighlight(mapW, mapH, mapRadius, mapBezel, mapScale, specAngle);
+  const dispUrl  = imageDataToDataURL(dispData);
+  const specUrl  = imageDataToDataURL(specData);
+
+  const scale = Math.min(cssMaxDisp * refractionScale, Math.min(w, h) * 0.13);
+  const ns  = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('data-glass-filter', filterId);
+  svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+  svg.innerHTML = `<defs>
+    <filter id="${filterId}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feImage href="${dispUrl}" x="0" y="0" width="${w}" height="${h}" result="dmap_raw" preserveAspectRatio="none"/>
+      <feGaussianBlur in="dmap_raw" stdDeviation="1.5" result="dmap"/>
+      <feDisplacementMap in="SourceGraphic" in2="dmap" scale="${scale}" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feColorMatrix in="displaced" type="saturate" values="1.3" result="saturated"/>
+      <feImage href="${specUrl}" x="0" y="0" width="${w}" height="${h}" result="specular" preserveAspectRatio="none"/>
+      <feComponentTransfer in="specular" result="specFaded">
+        <feFuncA type="linear" slope="${specOpacity}"/>
+      </feComponentTransfer>
+      <feBlend in="specFaded" in2="saturated" mode="screen"/>
+    </filter>
+  </defs>`;
+  document.body.appendChild(svg);
+  return svg;
+}
+
+function updateGlassFilterForInner(inner, filterId, cfg = {}) {
+  if (!inner) return;
+  const btn = inner.closest('button');
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  const w = Math.max(1, Math.round(rect.width));
+  const h = Math.max(1, Math.round(rect.height));
+  const r = cfg.radius ?? Math.min(w, h) / 2;
+  const prevW = Number(inner.dataset.glassFilterWidth || 0);
+  const prevH = Number(inner.dataset.glassFilterHeight || 0);
+  if (prevW === w && prevH === h && inner.dataset.glassFilterReady === 'true') return;
+
+  createGlassFilter(filterId, w, h, r, cfg);
+  const filterUrl = `url(#${filterId})`;
+  inner.style.backdropFilter = filterUrl;
+  inner.style.webkitBackdropFilter = filterUrl;
+  inner.style.setProperty('backdrop-filter', filterUrl);
+  inner.style.setProperty('-webkit-backdrop-filter', filterUrl);
+  inner.dataset.glassFilterWidth = String(w);
+  inner.dataset.glassFilterHeight = String(h);
+  inner.dataset.glassFilterReady = 'true';
+}
+
+function animateGlassLight(inner, filterId, cfg = {}) {
+  if (!inner) return;
+  const btn = inner.closest('button');
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  const w = Math.max(1, Math.round(rect.width));
+  const h = Math.max(1, Math.round(rect.height));
+  const r = cfg.radius ?? Math.min(w, h) / 2;
+  const baseAngle = cfg.specAngle ?? Math.PI / 4;
+  const start = performance.now();
+  const duration = 1200;
+
+  if (inner.dataset.lightAnimationFrame) {
+    cancelAnimationFrame(Number(inner.dataset.lightAnimationFrame));
+  }
+  inner.dataset.lightActive = 'true';
+
+  const frame = (now) => {
+    if (inner.dataset.lightActive !== 'true') {
+      stopGlassLight(inner, filterId, cfg);
+      return;
+    }
+    const t = Math.min(1, (now - start) / duration);
+    const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    createGlassFilter(filterId, w, h, r, {
+      ...cfg,
+      specAngle: baseAngle + eased * Math.PI * 1
+    });
+    inner.style.backdropFilter = `url(#${filterId})`;
+    inner.style.webkitBackdropFilter = `url(#${filterId})`;
+
+    if (t < 1) {
+      inner.dataset.lightAnimationFrame = String(requestAnimationFrame(frame));
+    } else {
+      delete inner.dataset.lightAnimationFrame;
+      delete inner.dataset.lightActive;
+      delete inner.dataset.glassFilterReady;
+      updateGlassFilterForInner(inner, filterId, cfg);
+    }
+  };
+
+  inner.dataset.lightAnimationFrame = String(requestAnimationFrame(frame));
+}
+
+function stopGlassLight(inner, filterId, cfg = {}) {
+  if (!inner) return;
+  if (inner.dataset.lightAnimationFrame) {
+    cancelAnimationFrame(Number(inner.dataset.lightAnimationFrame));
+    delete inner.dataset.lightAnimationFrame;
+  }
+  delete inner.dataset.lightActive;
+  delete inner.dataset.glassFilterReady;
+  updateGlassFilterForInner(inner, filterId, cfg);
+}
+
+function updateStyleGlassFilter() {
+  const styleInner = document.getElementById('glassStyle');
+  updateGlassFilterForInner(styleInner, 'glassStyleFilter', { bezelWidth: 14, glassThickness: 3, specularOpacity: 0.6 });
+}
+
+function bindGlassHover(inner, filterId, cfg = {}) {
+  const btn = inner?.closest('button');
+  if (!btn || btn.dataset.glassHoverBound === 'true') return;
+  btn.dataset.glassHoverBound = 'true';
+  btn.addEventListener('pointerenter', (event) => {
+    if (event.currentTarget !== btn) return;
+    animateGlassLight(inner, filterId, cfg);
+  });
+  btn.addEventListener('pointerleave', () => {
+    stopGlassLight(inner, filterId, cfg);
+  });
+}
+
+function initGlassButtons() {
+  const refInner = document.getElementById('glassRef');
+  const refCfg = {
+    radius: 18,
+    bezelWidth: 12,
+    glassThickness: 3,
+    specularOpacity: 0.6
+  };
+  updateGlassFilterForInner(refInner, 'glassRefFilter', refCfg);
+  bindGlassHover(refInner, 'glassRefFilter', refCfg);
+
+  const sendInner = document.getElementById('glassSend');
+  const sendCfg = {
+    radius: 18,
+    bezelWidth: 12,
+    glassThickness: 3,
+    specularOpacity: 0.65
+  };
+  updateGlassFilterForInner(sendInner, 'glassSendFilter', sendCfg);
+  bindGlassHover(sendInner, 'glassSendFilter', sendCfg);
+
+  updateStyleGlassFilter();
+  bindGlassHover(document.getElementById('glassStyle'), 'glassStyleFilter', {
+    bezelWidth: 14,
+    glassThickness: 3,
+    specularOpacity: 0.6
+  });
+
+  const styleButton = document.querySelector('.style-dropdown');
+  if (styleButton && 'ResizeObserver' in window) {
+    const observer = new ResizeObserver(() => {
+      requestAnimationFrame(updateStyleGlassFilter);
+    });
+    observer.observe(styleButton);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(initGlassButtons));
+} else {
+  requestAnimationFrame(initGlassButtons);
+}
 
 // === Messages from plugin ===
 window.onmessage = (event) => {
