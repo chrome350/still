@@ -1044,18 +1044,13 @@ body {
 <div class="menu-screen" id="menu-screen">
   <div class="menu-stats">
     <div class="menu-stat-row">
-      <span class="menu-stat-label">Всего использовали плагин</span>
+      <span class="menu-stat-label">Пользователей</span>
       <span class="menu-stat-value" id="stat-total-users">—</span>
     </div>
     <hr class="menu-divider">
     <div class="menu-stat-row">
-      <span class="menu-stat-label">Картинок сгенерировано</span>
+      <span class="menu-stat-label">Сгенерировано изображений</span>
       <span class="menu-stat-value" id="stat-images">—</span>
-    </div>
-    <hr class="menu-divider">
-    <div class="menu-stat-row">
-      <span class="menu-stat-label">Задач отправлено</span>
-      <span class="menu-stat-value" id="stat-tasks">—</span>
     </div>
     <hr class="menu-divider">
     <div class="menu-stat-row">
@@ -2326,6 +2321,39 @@ function openMenu() {
   document.getElementById('menu-screen').style.display = 'flex';
   document.querySelector('.main').style.display = 'none';
   document.querySelector('.input-bar').style.display = 'none';
+  fetchMenuStats();
+}
+
+// === Menu stats (/api/1/stats) ===
+// Тянет агрегированную стату для бокового меню.
+// Формат ответа от бэка: {users, imagesGenerated, jobsSubmitted, hoursSaved}.
+// jobsSubmitted в UI не показываем — это «задачи fal.ai» (по 2 на каждую генерацию),
+// для пользователя неинтересно. Часы считает сам бэк по формуле imagesGenerated * 3 / 60.
+function formatInt(n) {
+  if (n == null) return '—';
+  return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+function formatHours(n) {
+  if (n == null) return '—';
+  // Округляем до целого: 6.4 → 6, 6.5 → 7
+  return String(Math.round(Number(n))).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+async function fetchMenuStats() {
+  try {
+    const res = await authedFetch('/api/1/stats');
+    if (!res.ok) {
+      console.warn('[stats] not ok:', res.status, res.body);
+      return;
+    }
+    const s = res.body || {};
+    const el = (id) => document.getElementById(id);
+    if (el('stat-total-users')) el('stat-total-users').textContent = formatInt(s.users);
+    if (el('stat-images'))      el('stat-images').textContent      = formatInt(s.imagesGenerated);
+    if (el('stat-hours'))       el('stat-hours').textContent       = formatHours(s.hoursSaved);
+  } catch (e) {
+    console.warn('[stats] fetch failed:', e && e.message);
+  }
 }
 
 function closeMenu() {
